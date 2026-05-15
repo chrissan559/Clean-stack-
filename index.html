@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CleanStack — Investor Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ==============================
+   TOKENS
+============================== */
+:root {
+  --bg:           #060a0d;
+  --surface:      #0c1117;
+  --surface2:     #111820;
+  --surface3:     #161f28;
+  --border:       #1a2530;
+  --border2:      #20303d;
+  --teal:         #00d4aa;
+  --teal-dim:     #00a882;
+  --teal-deep:    #007a60;
+  --teal-glow:    rgba(0,212,170,.14);
+  --teal-glow2:   rgba(0,212,170,.06);
+  --amber:        #f5a623;
+  --amber-glow:   rgba(245,166,35,.12);
+  --red:          #e85555;
+  --blue:         #5b8af0;
+  --text:         #dde8ef;
+  --text2:        #a8bbc8;
+  --muted:        #4d6070;
+  --muted2:       #2d404e;
+
+  --radius-sm:    3px;
+  --radius:       6px;
+  --radius-lg:    10px;
+
+  --font-display: 'Syne', sans-serif;
+  --font-serif:   'Instrument Serif', serif;
+  --font-mono:    'DM Mono', monospace;
+
+  --shadow-teal:  0 0 32px rgba(0,212,170,.12), 0 0 64px rgba(0,212,170,.06);
+  --shadow-card:  0 4px 24px rgba(0,0,0,.4);
+  --shadow-card2: 0 8px 48px rgba(0,0,0,.6);
+}
+
+/* ==============================
+   RESET & BASE
+============================== */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:16px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  cursor: default;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+::-webkit-scrollbar-thumb:hover { background:var(--teal-deep); }
+
+/* ==============================
+   AMBIENT BACKGROUND
+============================== */
+/* Fine grid */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,170,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,170,.035) 1px, transparent 1px);
+  background-size:56px 56px;
+  pointer-events:none;
+  z-index:0;
+}
+/* Radial teal bloom top-left */
+body::after {
+  content:'';
+  position:fixed;
+  top:-200px; left:-200px;
+  width:700px; height:700px;
+  background: radial-gradient(circle, rgba(0,212,170,.07) 0%, transparent 70%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ==============================
+   NOISE TEXTURE OVERLAY
+============================== */
+.noise-overlay {
+  position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:0;
+  opacity:.6;
+}
+
+/* ==============================
+   NAV
+============================== */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 48px;
+  height:60px;
+  background: rgba(6,10,13,.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  transition: background .3s;
+}
+nav.scrolled { background:rgba(6,10,13,.97); }
+
+.nav-logo {
+  font-family:var(--font-display);
+  font-weight:800;
+  font-size:17px;
+  letter-spacing:-.5px;
+  color:var(--text);
+  display:flex; align-items:center; gap:2px;
+  text-decoration:none;
+}
+.nav-logo span { color:var(--teal); }
+.nav-logo-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--teal);
+  box-shadow:0 0 8px var(--teal);
+  animation:pulse 2s ease-in-out infinite;
+  margin-left:4px;
+}
+
+.nav-links {
+  display:flex; gap:28px; align-items:center;
+}
+.nav-links a {
+  font-size:9.5px; letter-spacing:2.5px;
+  text-transform:uppercase; color:var(--muted);
+  text-decoration:none; transition:color .2s;
+  position:relative;
+}
+.nav-links a::after {
+  content:''; position:absolute;
+  bottom:-2px; left:0; width:0; height:1px;
+  background:var(--teal); transition:width .2s;
+}
+.nav-links a:hover { color:var(--teal); }
+.nav-links a:hover::after { width:100%; }
+
+.nav-cta {
+  background:var(--teal) !important;
+  color:var(--bg) !important;
+  padding:8px 22px !important;
+  border-radius:var(--radius-sm) !important;
+  font-weight:600 !important;
+  letter-spacing:1.5px !important;
+  box-shadow:0 0 20px rgba(0,212,170,.25);
+  transition:background .2s, box-shadow .2s, transform .1s !important;
+}
+.nav-cta:hover {
+  background:var(--teal-dim) !important;
+  box-shadow:0 0 28px rgba(0,212,170,.4) !important;
+  transform:translateY(-1px) !important;
+}
+.nav-cta::after { display:none !important; }
+
+/* ==============================
+   SECTIONS BASE
+============================== */
+section { position:relative; z-index:1; }
+
+.container {
+  max-width:1120px;
+  margin:0 auto;
+  padding:0 48px;
+}
+@media (max-width:720px) { .container { padding:0 20px; } }
+
+/* ==============================
+   TYPOGRAPHY UTILS
+============================== */
+.section-label {
+  display:inline-flex; align-items:center; gap:10px;
+  font-size:9px; letter-spacing:4px; text-transform:uppercase;
+  color:var(--teal); margin-bottom:14px;
+  font-weight:500;
+}
+.section-label::before {
+  content:'';
+  width:24px; height:1px;
+  background:var(--teal);
+  display:block;
+}
+
+.section-title {
+  font-family:var(--font-display);
+  font-size:clamp(26px,4vw,46px);
+  font-weight:700; letter-spacing:-1.5px;
+  line-height:1.05; margin-bottom:44px;
+  color:var(--text);
+}
+
+/* ==============================
+   BUTTONS
+============================== */
+.btn-primary {
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--teal); color:var(--bg);
+  padding:14px 32px;
+  font-family:var(--font-mono);
+  font-size:10.5px; font-weight:500;
+  letter-spacing:2px; text-transform:uppercase;
+  border:none; border-radius:var(--radius-sm);
+  cursor:pointer; text-decoration:none;
+  box-shadow:0 0 24px rgba(0,212,170,.2);
+  transition:background .2s, box-shadow .2s, transform .1s;
+}
+.btn-primary:hover {
+  background:var(--teal-dim);
+  box-shadow:0 0 36px rgba(0,212,170,.35);
+  transform:translateY(-2px);
+}
+.btn-primary:active { transform:translateY(0); }
+
+.btn-ghost {
+  display:inline-flex; align-items:center; gap:8px;
+  background:transparent; color:var(--text2);
+  padding:14px 32px;
+  font-family:var(--font-mono);
+  font-size:10.5px; letter-spacing:2px;
+  text-transform:uppercase;
+  border:1px solid var(--border2);
+  border-radius:var(--radius-sm);
+  cursor:pointer; text-decoration:none;
+  transition:border-color .2s, color .2s, background .2s;
+}
+.btn-ghost:hover {
+  border-color:var(--teal);
+  color:var(--teal);
+  background:var(--teal-glow2);
+}
+
+/* ==============================
+   HERO
+============================== */
+#hero {
+  min-height:100vh;
+  display:flex; flex-direction:column;
+  justify-content:center;
+  padding:100px 48px 80px;
+  max-width:1120px;
+  margin:0 auto;
+}
+
+.hero-eyebrow {
+  display:inline-flex; align-items:center; gap:10px;
+  font-size:9.5px; letter-spacing:4px; text-transform:uppercase;
+  color:var(--teal); margin-bottom:30px;
+  padding:7px 16px;
+  background:var(--teal-glow2);
+  border:1px solid rgba(0,212,170,.2);
+  border-radius:20px;
+  width:fit-content;
+}
+.eyebrow-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--teal);
+  box-shadow:0 0 8px var(--teal);
+  animation:pulse 2s ease-in-out infinite;
+  flex-shrink:0;
+}
+
+h1.hero-title {
+  font-family:var(--font-display);
+  font-size:clamp(48px,9vw,104px);
+  font-weight:800;
+  line-height:0.92;
+  letter-spacing:-4px;
+  color:var(--text);
+  margin-bottom:32px;
+}
+h1.hero-title em {
+  font-family:var(--font-serif);
+  font-style:italic;
+  font-weight:400;
+  color:var(--teal);
+  letter-spacing:-2px;
+  text-shadow:0 0 60px rgba(0,212,170,.3);
+}
+
+.hero-desc {
+  font-size:12.5px; line-height:2;
+  color:var(--text2);
+  max-width:520px; margin-bottom:52px;
+  letter-spacing:.3px;
+}
+
+/* STATS BAR */
+.hero-stats {
+  display:flex; gap:0;
+  flex-wrap:wrap;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  overflow:hidden;
+  max-width:620px;
+  margin-bottom:52px;
+  background:var(--surface);
+  box-shadow:var(--shadow-card);
+}
+.hero-stat {
+  flex:1; min-width:130px;
+  padding:20px 24px;
+  border-right:1px solid var(--border);
+  transition:background .2s;
+}
+.hero-stat:last-child { border-right:none; }
+.hero-stat:hover { background:var(--surface2); }
+
+.sv {
+  font-family:var(--font-display);
+  font-size:30px; font-weight:700;
+  color:var(--teal); line-height:1;
+  margin-bottom:5px;
+}
+.sl {
+  font-size:8.5px; letter-spacing:2px;
+  text-transform:uppercase; color:var(--muted);
+}
+
+.hero-actions { display:flex; gap:14px; flex-wrap:wrap; }
+
+/* ==============================
+   DIVIDER
+============================== */
+.section-divider {
+  width:100%; height:1px;
+  background:linear-gradient(90deg, transparent, var(--border2), transparent);
+  margin:0;
+  position:relative; z-index:1;
+}
+
+/* ==============================
+   BID POOL
+============================== */
+#bid-pool { padding:96px 0; }
+
+.bid-layout {
+  display:grid;
+  grid-template-columns:1fr 360px;
+  gap:20px;
+  align-items:start;
+}
+
+/* LIVE BID CARD */
+.live-bid-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow-card);
+}
+.live-bid-card:hover { box-shadow:var(--shadow-teal), var(--shadow-card2); }
+transition: box-shadow .3s;
+
+.lbc-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 24px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(90deg, rgba(0,212,170,.04), transparent);
+}
+
+.live-badge {
+  display:flex; align-items:center; gap:8px;
+  font-size:9px; letter-spacing:3px; text-transform:uppercase;
+  color:var(--teal);
+}
+.live-dot {
+  width:7px; height:7px; border-radius:50%;
+  background:var(--teal);
+  box-shadow:0 0 8px var(--teal);
+  animation:pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:.45; transform:scale(.8); }
+}
+
+.countdown {
+  font-family:var(--font-display);
+  font-size:20px; font-weight:700;
+  color:var(--text); letter-spacing:2px;
+  display:flex; align-items:center; gap:4px;
+}
+.cd-label {
+  font-size:8.5px; color:var(--muted);
+  font-family:var(--font-mono);
+  letter-spacing:1px; margin-right:4px;
+}
+.cd-sep { color:var(--teal); opacity:.6; }
+
+.lbc-body { padding:24px; }
+
+.unit-name {
+  font-family:var(--font-display);
+  font-size:20px; font-weight:700; margin-bottom:4px;
+}
+.unit-loc {
+  font-size:9.5px; letter-spacing:2px;
+  color:var(--muted); text-transform:uppercase; margin-bottom:24px;
+}
+
+/* PROGRESS */
+.progress-wrap { margin-bottom:18px; }
+.progress-top {
+  display:flex; justify-content:space-between;
+  font-size:9.5px; color:var(--muted); margin-bottom:9px;
+  align-items:center;
+}
+.progress-top strong { color:var(--text); font-size:12px; }
+.progress-bar {
+  height:5px; background:var(--border);
+  border-radius:3px; overflow:hidden;
+  position:relative;
+}
+.progress-fill {
+  height:100%;
+  background:linear-gradient(90deg, var(--teal-deep), var(--teal));
+  border-radius:3px;
+  transition:width .8s cubic-bezier(.4,0,.2,1);
+  position:relative;
+}
+.progress-fill::after {
+  content:'';
+  position:absolute; right:0; top:50%;
+  transform:translateY(-50%);
+  width:10px; height:10px; border-radius:50%;
+  background:var(--teal);
+  box-shadow:0 0 8px var(--teal);
+}
+
+/* RAISED DISPLAY */
+.raised-display {
+  text-align:center;
+  padding:20px;
+  background:var(--teal-glow2);
+  border:1px solid rgba(0,212,170,.18);
+  border-radius:var(--radius-sm);
+  margin-bottom:20px;
+  position:relative; overflow:hidden;
+}
+.raised-display::before {
+  content:'';
+  position:absolute; inset:0;
+  background:radial-gradient(ellipse at center top, rgba(0,212,170,.08), transparent 70%);
+}
+.rd-amount {
+  font-family:var(--font-display);
+  font-size:38px; font-weight:800;
+  color:var(--teal); letter-spacing:-1.5px;
+  text-shadow:0 0 40px rgba(0,212,170,.3);
+  position:relative;
+}
+.rd-label {
+  font-size:8.5px; letter-spacing:3px;
+  text-transform:uppercase; color:var(--muted);
+  margin-top:4px; position:relative;
+}
+.rd-target {
+  font-size:10.5px; color:var(--muted);
+  margin-top:6px; position:relative;
+}
+.rd-target strong { color:var(--text); }
+
+/* SLOT PILLS */
+.slot-label {
+  font-size:8.5px; letter-spacing:2px;
+  color:var(--muted); text-transform:uppercase;
+  margin-bottom:10px; display:block;
+}
+.bid-slots {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:6px; margin-bottom:20px;
+}
+.slot-pill {
+  padding:9px 8px;
+  border-radius:var(--radius-sm);
+  font-size:10px; letter-spacing:1px;
+  text-align:center; cursor:pointer;
+  border:1px solid var(--border);
+  color:var(--muted); background:var(--surface2);
+  transition:all .15s; font-family:var(--font-mono);
+  user-select:none;
+}
+.slot-pill:hover {
+  border-color:rgba(0,212,170,.4);
+  color:var(--text2);
+  background:var(--surface3);
+}
+.slot-pill.active {
+  border-color:var(--teal);
+  color:var(--teal);
+  background:var(--teal-glow2);
+  box-shadow:0 0 16px rgba(0,212,170,.1);
+}
+
+/* FORM */
+.invest-form { display:flex; flex-direction:column; gap:11px; }
+.form-row { display:flex; gap:10px; }
+.form-field { flex:1; display:flex; flex-direction:column; gap:5px; }
+.form-field label {
+  font-size:8.5px; letter-spacing:2px;
+  text-transform:uppercase; color:var(--muted);
+}
+.form-field input {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:11px 14px;
+  font-family:var(--font-mono);
+  font-size:12px; border-radius:var(--radius-sm);
+  outline:none; transition:border-color .2s, box-shadow .2s;
+}
+.form-field input:focus {
+  border-color:var(--teal);
+  box-shadow:0 0 0 3px rgba(0,212,170,.08);
+}
+.form-field input::placeholder { color:var(--muted2); }
+.form-field input.error { border-color:var(--red); animation:shake .3s; }
+@keyframes shake {
+  0%,100%{ transform:translateX(0); }
+  25%{ transform:translateX(-4px); }
+  75%{ transform:translateX(4px); }
+}
+
+.amount-field-label {
+  font-size:8.5px; letter-spacing:2px;
+  text-transform:uppercase; color:var(--muted); margin-bottom:5px;
+}
+.amount-display {
+  background:var(--surface2);
+  border:1px solid var(--teal);
+  color:var(--teal);
+  padding:11px 16px;
+  font-family:var(--font-display);
+  font-size:22px; font-weight:700;
+  border-radius:var(--radius-sm);
+  letter-spacing:-.5px;
+  box-shadow:0 0 16px rgba(0,212,170,.08);
+}
+
+.submit-btn {
+  width:100%; background:var(--teal); color:var(--bg);
+  border:none; padding:16px;
+  font-family:var(--font-display);
+  font-size:14px; font-weight:700;
+  letter-spacing:.5px; border-radius:var(--radius-sm);
+  cursor:pointer;
+  box-shadow:0 4px 20px rgba(0,212,170,.25);
+  transition:background .2s, box-shadow .2s, transform .1s;
+  text-transform:uppercase;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.submit-btn:hover {
+  background:var(--teal-dim);
+  box-shadow:0 4px 32px rgba(0,212,170,.4);
+  transform:translateY(-1px);
+}
+.submit-btn:active { transform:scale(.99); }
+
+.form-note {
+  font-size:9px; color:var(--muted);
+  letter-spacing:.8px; text-align:center;
+  line-height:1.8;
+}
+
+/* ==============================
+   BID FEED (RIGHT COLUMN)
+============================== */
+.right-col { display:flex; flex-direction:column; gap:16px; }
+
+.bid-feed {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow-card);
+}
+.feed-header {
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+  font-size:8.5px; letter-spacing:3px;
+  text-transform:uppercase; color:var(--teal);
+  display:flex; align-items:center; justify-content:space-between;
+  background:linear-gradient(90deg, rgba(0,212,170,.04), transparent);
+}
+.feed-count {
+  background:var(--teal-glow);
+  color:var(--teal); padding:2px 10px;
+  border-radius:12px; font-size:9.5px;
+}
+.feed-list { max-height:280px; overflow-y:auto; }
+.feed-item {
+  display:grid;
+  grid-template-columns:34px 1fr auto;
+  gap:10px; align-items:center;
+  padding:10px 20px;
+  border-bottom:1px solid var(--border);
+  animation:slideIn .4s ease;
+  transition:background .15s;
+}
+.feed-item:hover { background:var(--surface2); }
+.feed-item:last-child { border-bottom:none; }
+@keyframes slideIn {
+  from { opacity:0; transform:translateX(-8px); }
+  to { opacity:1; transform:translateX(0); }
+}
+.feed-avatar {
+  width:34px; height:34px; border-radius:50%;
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:600;
+  color:var(--teal); font-family:var(--font-display);
+  flex-shrink:0;
+}
+.feed-name { font-size:11px; color:var(--text); margin-bottom:2px; }
+.feed-time { font-size:8.5px; color:var(--muted); letter-spacing:1px; }
+.feed-amount {
+  font-family:var(--font-display);
+  font-size:13px; font-weight:700; color:var(--teal); white-space:nowrap;
+}
+
+/* RETURNS MINI CARD */
+.returns-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px;
+  box-shadow:var(--shadow-card);
+}
+.returns-card-label {
+  font-size:8.5px; letter-spacing:3px;
+  text-transform:uppercase; color:var(--teal);
+  margin-bottom:16px; display:flex; align-items:center; gap:8px;
+}
+.returns-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:8px;
+}
+.rg-item {
+  padding:12px;
+  background:var(--surface2);
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  transition:border-color .2s;
+}
+.rg-item:hover { border-color:rgba(0,212,170,.3); }
+.rg-label {
+  font-size:8px; letter-spacing:1.5px;
+  color:var(--muted); margin-bottom:5px;
+  text-transform:uppercase;
+}
+.rg-val {
+  font-family:var(--font-display);
+  font-size:19px; font-weight:700;
+  line-height:1; margin-bottom:3px;
+}
+.rg-sub { font-size:8.5px; color:var(--muted); }
+.rg-teal .rg-val { color:var(--teal); }
+.rg-amber .rg-val { color:var(--amber); }
+.rg-white .rg-val { color:var(--text); }
+
+/* ==============================
+   MODEL / HOW IT WORKS
+============================== */
+#model { padding:96px 0; }
+
+/* HOW IT WORKS STEPS */
+.hiw-grid {
+  display:grid; grid-template-columns:repeat(5,1fr);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden; margin-bottom:56px;
+  box-shadow:var(--shadow-card);
+}
+.hiw-step {
+  padding:28px 20px;
+  border-right:1px solid var(--border);
+  background:var(--surface);
+  position:relative;
+  transition:background .2s;
+}
+.hiw-step:hover { background:var(--surface2); }
+.hiw-step:last-child { border-right:none; }
+.hiw-num {
+  font-family:var(--font-display);
+  font-size:10px; font-weight:700; color:var(--teal);
+  margin-bottom:14px; letter-spacing:2px;
+}
+.hiw-icon { font-size:24px; margin-bottom:12px; display:block; }
+.hiw-title {
+  font-family:var(--font-display);
+  font-size:13px; font-weight:700;
+  margin-bottom:8px; color:var(--text);
+}
+.hiw-desc { font-size:9.5px; color:var(--muted); line-height:1.9; }
+.arrow-connector {
+  position:absolute; right:-10px; top:36px;
+  color:var(--teal); font-size:16px;
+  z-index:1; opacity:.5;
+}
+
+/* CASHFLOW MODEL */
+.model-grid {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:2px; margin-top:40px;
+}
+.model-block {
+  padding:28px 22px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  position:relative; overflow:hidden;
+  transition:background .2s, border-color .2s;
+}
+.model-block:hover {
+  background:var(--surface2);
+  border-color:var(--border2);
+}
+.model-block::before {
+  content:''; position:absolute;
+  top:0; left:0; right:0; height:2px;
+}
+.mb-you::before { background:linear-gradient(90deg,var(--amber-glow),var(--amber)); }
+.mb-inv::before { background:linear-gradient(90deg,var(--teal-glow2),var(--teal)); }
+.mb-ret::before { background:linear-gradient(90deg,rgba(91,138,240,.1),var(--blue)); }
+.mb-buf::before { background:linear-gradient(90deg,rgba(232,85,85,.1),var(--red)); }
+
+.mb-pct {
+  font-family:var(--font-display);
+  font-size:54px; font-weight:800;
+  line-height:1; margin-bottom:10px;
+  letter-spacing:-3px;
+}
+.mb-you .mb-pct { color:var(--amber); }
+.mb-inv .mb-pct { color:var(--teal); }
+.mb-ret .mb-pct { color:var(--blue); }
+.mb-buf .mb-pct { color:var(--red); }
+
+.mb-title {
+  font-family:var(--font-display);
+  font-size:13px; font-weight:700;
+  margin-bottom:8px; color:var(--text);
+}
+.mb-desc { font-size:9.5px; color:var(--muted); line-height:1.9; }
+
+/* ==============================
+   UNITS PIPELINE
+============================== */
+#units { padding:96px 0; }
+
+.units-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+}
+.unit-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  transition:border-color .25s, transform .25s, box-shadow .25s;
+  box-shadow:var(--shadow-card);
+}
+.unit-card:hover {
+  border-color:rgba(0,212,170,.4);
+  transform:translateY(-3px);
+  box-shadow:var(--shadow-card2);
+}
+.unit-card.active-unit {
+  border-color:var(--teal);
+  box-shadow:var(--shadow-teal), var(--shadow-card);
+}
+
+.uc-top {
+  padding:20px 20px 16px;
+  border-bottom:1px solid var(--border);
+}
+.uc-status {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:7.5px; letter-spacing:3px; text-transform:uppercase;
+  padding:3px 10px; border-radius:12px; margin-bottom:12px;
+}
+.status-live { background:var(--teal-glow); color:var(--teal); }
+.status-upcoming { background:var(--amber-glow); color:var(--amber); }
+.status-funded { background:rgba(91,138,240,.1); color:var(--blue); }
+
+.uc-name {
+  font-family:var(--font-display);
+  font-size:16px; font-weight:700; margin-bottom:4px;
+}
+.uc-loc {
+  font-size:8.5px; letter-spacing:2px;
+  color:var(--muted); text-transform:uppercase;
+}
+.uc-body { padding:16px 20px; }
+.uc-progress { margin-bottom:16px; }
+.uc-prog-bar {
+  height:3px; background:var(--border);
+  border-radius:2px; margin-bottom:7px; overflow:hidden;
+}
+.uc-prog-fill {
+  height:100%;
+  background:linear-gradient(90deg, var(--teal-deep), var(--teal));
+  border-radius:2px;
+}
+.uc-prog-stats {
+  display:flex; justify-content:space-between;
+  font-size:8.5px; color:var(--muted);
+}
+.uc-prog-stats strong { color:var(--text); }
+
+.uc-meta {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:8px; margin-bottom:16px;
+}
+.uc-meta-item .umi-l {
+  font-size:7.5px; letter-spacing:2px;
+  text-transform:uppercase; color:var(--muted); margin-bottom:2px;
+}
+.uc-meta-item .umi-v {
+  font-size:13px;
+  font-family:var(--font-display);
+  font-weight:700; color:var(--text);
+}
+.uc-btn {
+  width:100%; padding:11px;
+  font-family:var(--font-mono);
+  font-size:9.5px; letter-spacing:2px;
+  text-transform:uppercase; border-radius:var(--radius-sm);
+  cursor:pointer; transition:all .2s; border:none;
+}
+.uc-btn-active {
+  background:var(--teal); color:var(--bg);
+  font-weight:600;
+  box-shadow:0 2px 12px rgba(0,212,170,.2);
+}
+.uc-btn-active:hover {
+  background:var(--teal-dim);
+  box-shadow:0 2px 20px rgba(0,212,170,.35);
+}
+.uc-btn-soon {
+  background:transparent; color:var(--muted);
+  border:1px solid var(--border);
+}
+.uc-btn-soon:hover { border-color:rgba(0,212,170,.3); color:var(--text2); }
+.uc-btn-done {
+  background:var(--surface2); color:var(--muted);
+  border:1px solid var(--border); cursor:default;
+}
+
+/* ==============================
+   FAQ
+============================== */
+#faq { padding:96px 0; max-width:760px; }
+
+.faq-list { display:flex; flex-direction:column; gap:3px; }
+.faq-item {
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  overflow:hidden;
+  transition:border-color .2s;
+}
+.faq-item:hover { border-color:var(--border2); }
+.faq-item.open { border-color:rgba(0,212,170,.3); }
+
+.faq-q {
+  display:flex; align-items:center;
+  justify-content:space-between;
+  padding:17px 20px;
+  cursor:pointer;
+  font-family:var(--font-display);
+  font-size:14px; font-weight:600;
+  color:var(--text); gap:16px;
+  transition:background .15s, color .2s;
+  user-select:none;
+}
+.faq-q:hover { background:var(--surface); }
+.faq-item.open .faq-q { background:var(--surface); color:var(--teal); }
+
+.faq-icon {
+  font-size:20px; color:var(--muted); flex-shrink:0;
+  transition:transform .25s, color .2s; line-height:1;
+}
+.faq-item.open .faq-icon { transform:rotate(45deg); color:var(--teal); }
+
+.faq-a {
+  display:none;
+  padding:0 20px 20px;
+  font-size:10.5px; color:var(--text2);
+  line-height:1.9;
+  border-top:1px solid var(--border);
+  padding-top:14px;
+}
+.faq-item.open .faq-a { display:block; animation:fadeIn .2s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+
+/* ==============================
+   CONTACT
+============================== */
+#contact { padding:96px 0; }
+
+.contact-grid {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:12px; margin-top:36px;
+}
+.contact-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:24px;
+  text-align:center;
+  transition:border-color .2s, transform .2s, box-shadow .2s;
+  cursor:pointer; text-decoration:none;
+  display:block;
+}
+.contact-card:hover {
+  border-color:var(--teal);
+  transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(0,212,170,.1);
+}
+.cc-icon { font-size:28px; margin-bottom:12px; display:block; }
+.cc-platform {
+  font-family:var(--font-display);
+  font-size:13px; font-weight:700;
+  margin-bottom:6px; color:var(--text);
+}
+.cc-value {
+  font-size:10.5px; color:var(--teal);
+  word-break:break-all; text-decoration:none;
+}
+
+/* ==============================
+   FOOTER
+============================== */
+footer {
+  border-top:1px solid var(--border);
+  padding:40px 48px;
+  display:flex; flex-direction:column;
+  align-items:center; text-align:center;
+  gap:18px; position:relative; z-index:1;
+}
+.footer-logo {
+  font-family:var(--font-display);
+  font-weight:800; font-size:16px;
+}
+.footer-logo span { color:var(--teal); }
+.footer-links {
+  display:flex; gap:20px; flex-wrap:wrap;
+  justify-content:center; align-items:center;
+}
+.footer-links a {
+  font-size:9.5px; color:var(--muted);
+  text-decoration:none; letter-spacing:1px;
+  transition:color .2s;
+}
+.footer-links a:hover { color:var(--teal); }
+.footer-sep { color:var(--border2); }
+.footer-note {
+  font-size:8.5px; color:var(--muted);
+  letter-spacing:1px; line-height:1.8;
+}
+
+/* ==============================
+   SUCCESS MODAL
+============================== */
+.modal-overlay {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.85);
+  backdrop-filter:blur(8px) saturate(120%);
+  z-index:300;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none;
+  transition:opacity .3s;
+}
+.modal-overlay.show { opacity:1; pointer-events:all; }
+
+.modal {
+  background:var(--surface);
+  border:1px solid rgba(0,212,170,.4);
+  border-radius:var(--radius-lg);
+  padding:48px 44px;
+  max-width:420px; width:90%;
+  text-align:center;
+  transform:translateY(20px) scale(.97);
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 32px 80px rgba(0,0,0,.6), var(--shadow-teal);
+}
+.modal-overlay.show .modal { transform:translateY(0) scale(1); }
+
+.modal-icon {
+  width:64px; height:64px; border-radius:50%;
+  background:var(--teal-glow);
+  border:1px solid rgba(0,212,170,.4);
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px; margin:0 auto 24px;
+  box-shadow:0 0 32px rgba(0,212,170,.2);
+}
+.modal h3 {
+  font-family:var(--font-display);
+  font-size:24px; font-weight:700; margin-bottom:12px;
+}
+.modal p { font-size:11px; color:var(--text2); line-height:1.9; margin-bottom:22px; }
+.modal-ref {
+  background:var(--surface2);
+  border:1px solid rgba(0,212,170,.25);
+  padding:12px 20px; border-radius:var(--radius-sm);
+  font-size:14px; color:var(--teal); letter-spacing:3px;
+  margin-bottom:22px;
+  font-family:var(--font-display); font-weight:700;
+  box-shadow:inset 0 0 16px rgba(0,212,170,.05);
+}
+.modal-hint {
+  font-size:9.5px; color:var(--muted); margin-bottom:18px; letter-spacing:.5px;
+}
+.modal-close {
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--muted); padding:10px 32px;
+  border-radius:var(--radius-sm);
+  font-family:var(--font-mono);
+  font-size:10px; letter-spacing:2px;
+  text-transform:uppercase; cursor:pointer;
+  transition:all .2s;
+}
+.modal-close:hover { border-color:var(--teal); color:var(--teal); background:var(--teal-glow2); }
+
+/* ==============================
+   ENTRANCE ANIMATIONS
+============================== */
+.anim { opacity:0; animation:fadeUp .65s ease forwards; }
+.d1 { animation-delay:.08s; }
+.d2 { animation-delay:.18s; }
+.d3 { animation-delay:.28s; }
+.d4 { animation-delay:.38s; }
+.d5 { animation-delay:.48s; }
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(28px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* Intersection observer fade */
+.reveal { opacity:0; transform:translateY(32px); transition:opacity .6s ease, transform .6s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* ==============================
+   RESPONSIVE
+============================== */
+@media (max-width:900px) {
+  .bid-layout { grid-template-columns:1fr; }
+  .hiw-grid { grid-template-columns:1fr 1fr; }
+  .model-grid { grid-template-columns:1fr 1fr; }
+  .contact-grid { grid-template-columns:1fr 1fr; }
+  .units-grid { grid-template-columns:1fr; }
+}
+@media (max-width:640px) {
+  nav { padding:0 20px; }
+  nav .nav-links { display:none; }
+  #hero { padding:100px 20px 60px; }
+  .bid-slots { grid-template-columns:1fr 1fr; }
+  .hiw-grid { grid-template-columns:1fr; }
+  .model-grid { grid-template-columns:1fr 1fr; }
+  .contact-grid { grid-template-columns:1fr 1fr; }
+  footer { padding:32px 20px; }
+  .hero-stats { max-width:100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a href="#" class="nav-logo">Clean<span>Stack</span><div class="nav-logo-dot"></div></a>
+  <div class="nav-links">
+    <a href="#bid-pool">Live Bid</a>
+    <a href="#model">The Model</a>
+    <a href="#units">Units</a>
+    <a href="#faq">FAQ</a>
+    <a href="#contact">Contact</a>
+    <a href="#bid-pool" class="nav-cta">Invest Now</a>
+  </div>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<section id="hero">
+  <div class="hero-eyebrow anim d1">
+    <div class="eyebrow-dot"></div>
+    Port Harcourt · Nigeria · Inflation-Proof Asset
+  </div>
+  <h1 class="hero-title anim d2">Own a Slice<br>of <em>Essential</em><br>Infrastructure.</h1>
+  <p class="hero-desc anim d3">
+    CleanStack pools investor capital to launch fully-staffed commercial laundry units across Port Harcourt.
+    Each unit runs without you. You earn 30% of cashflow. The machine compounds forever.
+  </p>
+  <div class="hero-stats anim d4">
+    <div class="hero-stat"><div class="sv">₦2.5M</div><div class="sl">Target per unit</div></div>
+    <div class="hero-stat"><div class="sv">30%</div><div class="sl">Your cashflow share</div></div>
+    <div class="hero-stat"><div class="sv">7–11mo</div><div class="sl">Payback window</div></div>
+    <div class="hero-stat"><div class="sv">∞</div><div class="sl">Business lifespan</div></div>
+  </div>
+  <div class="hero-actions anim d5">
+    <a href="#bid-pool" class="btn-primary">⚡ Join the Bid Round</a>
+    <a href="#model" class="btn-ghost">See How It Works →</a>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===================== BID POOL ===================== -->
+<section id="bid-pool">
+  <div class="container">
+    <div class="section-label reveal">Active Round</div>
+    <div class="section-title reveal">Live Bidding Pool
+      <br><span style="color:var(--muted);font-size:55%;letter-spacing:-0.5px;">Unit 01 — Woji / GRA Axis</span>
+    </div>
+
+    <div class="bid-layout">
+      <!-- LEFT: BID CARD -->
+      <div class="live-bid-card reveal">
+        <div class="lbc-header">
+          <div class="live-badge"><div class="live-dot"></div> Bidding Open</div>
+          <div class="countdown">
+            <span class="cd-label">closes in</span>
+            <span id="cd-h">04</span><span class="cd-sep">:</span><span id="cd-m">58</span><span class="cd-sep">:</span><span id="cd-s">33</span>
+          </div>
+        </div>
+        <div class="lbc-body">
+          <div class="unit-name">CleanStack Unit 01</div>
+          <div class="unit-loc">📍 Woji / GRA Axis, Port Harcourt</div>
+
+          <div class="progress-wrap">
+            <div class="progress-top">
+              <span>Pool progress</span>
+              <strong id="pct-label">71%</strong>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="main-progress" style="width:71%"></div>
+            </div>
+          </div>
+
+          <div class="raised-display">
+            <div class="rd-amount" id="raised-amount">₦1,775,000</div>
+            <div class="rd-label">raised this round</div>
+            <div class="rd-target">Target: <strong>₦2,500,000</strong> — <span id="remaining-label">₦725,000 remaining</span></div>
+          </div>
+
+          <span class="slot-label">Select a slot size</span>
+          <div class="bid-slots" id="slot-grid">
+            <div class="slot-pill" data-amount="50000">₦50K</div>
+            <div class="slot-pill" data-amount="100000">₦100K</div>
+            <div class="slot-pill active" data-amount="250000">₦250K</div>
+            <div class="slot-pill" data-amount="500000">₦500K</div>
+          </div>
+
+          <div class="invest-form">
+            <div class="form-row">
+              <div class="form-field">
+                <label>Full Name</label>
+                <input type="text" id="inv-name" placeholder="e.g. Chidi Okafor" autocomplete="name"/>
+              </div>
+              <div class="form-field">
+                <label>Phone / WhatsApp</label>
+                <input type="tel" id="inv-phone" placeholder="+234 810…" autocomplete="tel"/>
+              </div>
+            </div>
+            <div>
+              <div class="amount-field-label">Your Bid Amount</div>
+              <div class="amount-display" id="amount-display">₦250,000</div>
+            </div>
+            <button class="submit-btn" onclick="submitBid()">⚡ Lock In My Slot</button>
+            <p class="form-note">
+              Funds are held in escrow until the target is hit.<br>
+              If target is not met, 100% is returned within 48 hours.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="right-col">
+        <div class="bid-feed reveal">
+          <div class="feed-header">
+            Investor Activity
+            <div class="feed-count" id="feed-count">14 investors</div>
+          </div>
+          <div class="feed-list" id="feed-list"></div>
+        </div>
+
+        <div class="returns-card reveal">
+          <div class="returns-card-label">📈 Projected Returns — ₦250K Slot</div>
+          <div class="returns-grid">
+            <div class="rg-item rg-teal">
+              <div class="rg-label">Monthly payout</div>
+              <div class="rg-val">₦30K</div>
+              <div class="rg-sub">~12% of slot/mo</div>
+            </div>
+            <div class="rg-item rg-amber">
+              <div class="rg-label">Full payback</div>
+              <div class="rg-val">~9 mo</div>
+              <div class="rg-sub">then pure yield</div>
+            </div>
+            <div class="rg-item rg-white">
+              <div class="rg-label">Year 1 return</div>
+              <div class="rg-val">₦360K</div>
+              <div class="rg-sub">144% on ₦250K</div>
+            </div>
+            <div class="rg-item rg-white">
+              <div class="rg-label">Your equity</div>
+              <div class="rg-val">10%</div>
+              <div class="rg-sub">of this unit</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===================== MODEL ===================== -->
+<section id="model">
+  <div class="container">
+    <div class="section-label reveal">The Architecture</div>
+    <div class="section-title reveal">How CleanStack Works</div>
+
+    <div class="hiw-grid reveal">
+      <div class="hiw-step">
+        <div class="hiw-num">01</div>
+        <div class="hiw-icon">🎯</div>
+        <div class="hiw-title">Bid Opens</div>
+        <div class="hiw-desc">A unit is listed. Target capital and location announced. Bidding window: 7 days or until full.</div>
+        <div class="arrow-connector">›</div>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-num">02</div>
+        <div class="hiw-icon">💰</div>
+        <div class="hiw-title">Investors Pool In</div>
+        <div class="hiw-desc">Slots from ₦50K. Each slot = proportional cashflow share. Escrow-held until target hit.</div>
+        <div class="arrow-connector">›</div>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-num">03</div>
+        <div class="hiw-icon">🏗️</div>
+        <div class="hiw-title">Unit is Built</div>
+        <div class="hiw-desc">Target met → fit-out begins immediately. Equipment, staff, systems. 2–3 weeks to launch.</div>
+        <div class="arrow-connector">›</div>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-num">04</div>
+        <div class="hiw-icon">⚙️</div>
+        <div class="hiw-title">Machine Runs</div>
+        <div class="hiw-desc">Manager + staff operate daily. Monthly WhatsApp report. Zero involvement required.</div>
+        <div class="arrow-connector">›</div>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-num">05</div>
+        <div class="hiw-icon">📲</div>
+        <div class="hiw-title">You Get Paid</div>
+        <div class="hiw-desc">Monthly bank transfer on the 28th. Proportional to your slot size. Indefinitely — or until you exit.</div>
+      </div>
+    </div>
+
+    <div class="section-label reveal" style="margin-top:0;">Cashflow Architecture</div>
+    <div class="section-title reveal" style="font-size:clamp(22px,3vw,36px);margin-bottom:0;">Every Naira Earned, Accounted For</div>
+
+    <div class="model-grid reveal">
+      <div class="model-block mb-you">
+        <div class="mb-pct">30%</div>
+        <div class="mb-title">Founder</div>
+        <div class="mb-desc">Systems designer & operator. Paid for building and managing the machine — not for daily presence.</div>
+      </div>
+      <div class="model-block mb-inv">
+        <div class="mb-pct">30%</div>
+        <div class="mb-title">Investors</div>
+        <div class="mb-desc">Distributed monthly, proportional to slot size. Steps down after full payback — exit terms set upfront.</div>
+      </div>
+      <div class="model-block mb-ret">
+        <div class="mb-pct">30%</div>
+        <div class="mb-title">Retained</div>
+        <div class="mb-desc">Never distributed. Auto-funds the next unit. Unit 01 retained seeds Unit 02 without a new raise.</div>
+      </div>
+      <div class="model-block mb-buf">
+        <div class="mb-pct">10%</div>
+        <div class="mb-title">Buffer</div>
+        <div class="mb-desc">Sits in a money market fund. Covers 30 days of disruption. Replenished before any other distribution.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===================== UNITS ===================== -->
+<section id="units">
+  <div class="container">
+    <div class="section-label reveal">Pipeline</div>
+    <div class="section-title reveal">All Units</div>
+
+    <div class="units-grid">
+      <div class="unit-card active-unit reveal">
+        <div class="uc-top">
+          <div class="uc-status status-live">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--teal);display:inline-block;animation:pulse 1.5s infinite;"></span>
+            Live Bidding
+          </div>
+          <div class="uc-name">Unit 01 — Woji</div>
+          <div class="uc-loc">Woji / GRA Axis, PH</div>
+        </div>
+        <div class="uc-body">
+          <div class="uc-progress">
+            <div class="uc-prog-bar"><div class="uc-prog-fill" style="width:71%"></div></div>
+            <div class="uc-prog-stats"><span>71% funded</span><strong>₦1.775M / ₦2.5M</strong></div>
+          </div>
+          <div class="uc-meta">
+            <div class="uc-meta-item"><div class="umi-l">Min. slot</div><div class="umi-v">₦50K</div></div>
+            <div class="uc-meta-item"><div class="umi-l">Payback</div><div class="umi-v">~9 mo</div></div>
+            <div class="uc-meta-item"><div class="umi-l">Investors</div><div class="umi-v" id="uc-count">14</div></div>
+            <div class="uc-meta-item"><div class="umi-l">Yield</div><div class="umi-v">~12%/mo</div></div>
+          </div>
+          <button class="uc-btn uc-btn-active" onclick="document.getElementById('bid-pool').scrollIntoView({behavior:'smooth'})">Bid Now →</button>
+        </div>
+      </div>
+
+      <div class="unit-card reveal">
+        <div class="uc-top">
+          <div class="uc-status status-upcoming">⏳ Upcoming</div>
+          <div class="uc-name">Unit 02 — Rumuola</div>
+          <div class="uc-loc">Rumuola / Rumuokoro, PH</div>
+        </div>
+        <div class="uc-body">
+          <div class="uc-progress">
+            <div class="uc-prog-bar"><div class="uc-prog-fill" style="width:0%"></div></div>
+            <div class="uc-prog-stats"><span>Opens after Unit 01 closes</span><strong>₦2.5M target</strong></div>
+          </div>
+          <div class="uc-meta">
+            <div class="uc-meta-item"><div class="umi-l">Min. slot</div><div class="umi-v">₦50K</div></div>
+            <div class="uc-meta-item"><div class="umi-l">Payback</div><div class="umi-v">~9 mo</div></div>
+            <div class="uc-meta-item"><div class="umi-l">Investors</div><div class="umi-v">—</div></div>
+            <div class="uc-meta-item"><div class="umi-l">Seed source</div><div class="umi-v">Unit 01 retained</div></div>
+          </div>
+          <button class="uc-btn uc-btn-soon">Join Waitlist</button>
+        </div>
+      </div>
+
+      <div class="unit-card reveal">
+        <div class="uc-top">
+          <div class="uc-status status-upcoming">⏳ Upcoming</div>
+          <div class="uc-name">Unit 03 — Trans Amadi</div>
+          <div class="uc-loc">Trans Amadi Industrial, PH</div>
+        </div>
+        <div class="uc-body">
+          <div class="uc-progress">
+            <div class="uc-prog-bar"><div class="uc-prog-fill" style="width:0%"></div></div>
+            <div class="uc-prog-stats"><span>Industrial / Hotel Focus</span><strong>₦3.5M target</strong></div>
+          </div>
+          <div class="uc-meta">
+            <div class="uc-meta-item"><div class="umi-l">Min. slot</div><div class="umi-v">₦100K</div></div>
+            <div class="uc-meta-item"><div class="umi-l">Focus</div><div class="umi-v">B2B</div></div>
+            <div class="uc-meta-item"><div class="umi-l">Anchor client</div><div class="umi-v">Hotel contracts</div></div>
+            <div class="uc-meta-item"><div class="umi-l">Est. launch</div><div class="umi-v">Q3 2025</div></div>
+          </div>
+          <button class="uc-btn uc-btn-soon">Join Waitlist</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===================== FAQ ===================== -->
+<section id="faq" style="margin:0 auto;">
+  <div class="container" style="max-width:760px;">
+    <div class="section-label reveal">Questions</div>
+    <div class="section-title reveal">Common Questions</div>
+    <div class="faq-list" id="faq-list"></div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===================== CONTACT ===================== -->
+<section id="contact">
+  <div class="container">
+    <div class="section-label reveal">Get In Touch</div>
+    <div class="section-title reveal">Contact CleanStack</div>
+    <div class="contact-grid">
+      <a href="https://t.me/KcTradesandToks" target="_blank" class="contact-card reveal">
+        <span class="cc-icon">📱</span>
+        <div class="cc-platform">Telegram</div>
+        <div class="cc-value">@KcTradesandToks</div>
+      </a>
+      <a href="https://wa.me/2347031379047" target="_blank" class="contact-card reveal">
+        <span class="cc-icon">💬</span>
+        <div class="cc-platform">WhatsApp</div>
+        <div class="cc-value">7031379047</div>
+      </a>
+      <a href="mailto:chrisbizcorperation@gmail.com" class="contact-card reveal">
+        <span class="cc-icon">✉️</span>
+        <div class="cc-platform">Email</div>
+        <div class="cc-value">chrisbizcorperation@gmail.com</div>
+      </a>
+      <a href="tel:+2347031379047" class="contact-card reveal">
+        <span class="cc-icon">📞</span>
+        <div class="cc-platform">Phone</div>
+        <div class="cc-value">+2347031379047</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="footer-logo">Clean<span>Stack</span></div>
+  <div class="footer-links">
+    <a href="https://t.me/KcTradesandToks" target="_blank">Telegram: @KcTradesandToks</a>
+    <span class="footer-sep">|</span>
+    <a href="https://wa.me/2347031379047" target="_blank">WhatsApp: 7031379047</a>
+    <span class="footer-sep">|</span>
+    <a href="mailto:chrisbizcorperation@gmail.com">chrisbizcorperation@gmail.com</a>
+    <span class="footer-sep">|</span>
+    <a href="tel:+2347031379047">+2347031379047</a>
+  </div>
+  <div class="footer-note">
+    Port Harcourt, Rivers State, Nigeria<br>
+    Built on the Perpetual Business Architecture model
+  </div>
+</footer>
+
+<!-- ===================== MODAL ===================== -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-icon">✓</div>
+    <h3>Slot Locked In</h3>
+    <p>Your position has been reserved. You'll receive a confirmation on WhatsApp within 10 minutes with escrow payment details.</p>
+    <div class="modal-ref" id="modal-ref">CS-01-0015</div>
+    <p class="modal-hint">Share this reference number with us on WhatsApp to complete your payment.</p>
+    <button class="modal-close" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<script>
+// ——— NAV SCROLL ————————————————————
+const nav = document.getElementById('main-nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+}, { passive: true });
+
+// ——— REVEAL ON SCROLL ——————————————
+const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -48px 0px' });
+revealEls.forEach(el => observer.observe(el));
+
+// ——— COUNTDOWN ——————————————————————
+let totalSecs = 4 * 3600 + 58 * 60 + 33;
+function tick() {
+  if (totalSecs <= 0) return;
+  totalSecs--;
+  const h = Math.floor(totalSecs / 3600);
+  const m = Math.floor((totalSecs % 3600) / 60);
+  const s = totalSecs % 60;
+  document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
+  document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
+  document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
+}
+setInterval(tick, 1000);
+
+// ——— SLOT SELECTOR ——————————————————
+let selectedAmount = 250000;
+document.getElementById('slot-grid').addEventListener('click', e => {
+  const pill = e.target.closest('.slot-pill');
+  if (!pill) return;
+  document.querySelectorAll('.slot-pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  selectedAmount = parseInt(pill.dataset.amount);
+  document.getElementById('amount-display').textContent = '₦' + selectedAmount.toLocaleString();
+});
+
+// ——— FEED DATA ————————————————————
+const investors = [
+  { name: 'Chioma A.', amount: 250000, time: '2 mins ago' },
+  { name: 'Emmanuel O.', amount: 500000, time: '18 mins ago' },
+  { name: 'Blessing N.', amount: 100000, time: '34 mins ago' },
+  { name: 'Kelechi I.', amount: 250000, time: '51 mins ago' },
+  { name: 'Adaeze M.', amount: 50000, time: '1hr 12m ago' },
+  { name: 'David E.', amount: 100000, time: '1hr 30m ago' },
+  { name: 'Ngozi P.', amount: 250000, time: '2hrs ago' },
+  { name: 'Femi A.', amount: 500000, time: '3hrs ago' },
+  { name: 'Ifeoma S.', amount: 50000, time: '4hrs ago' },
+  { name: 'Tunde B.', amount: 100000, time: '5hrs ago' },
+  { name: 'Amaka C.', amount: 250000, time: '6hrs ago' },
+  { name: 'Obinna T.', amount: 50000, time: '8hrs ago' },
+  { name: 'Stella O.', amount: 100000, time: '10hrs ago' },
+  { name: 'Raymond K.', amount: 25000, time: '12hrs ago' },
+];
+
+const feedList = document.getElementById('feed-list');
+investors.forEach(inv => {
+  const initials = inv.name.split(' ').map(w => w[0]).join('');
+  const div = document.createElement('div');
+  div.className = 'feed-item';
+  div.innerHTML = `
+    <div class="feed-avatar">${initials}</div>
+    <div><div class="feed-name">${inv.name}</div><div class="feed-time">${inv.time}</div></div>
+    <div class="feed-amount">₦${inv.amount.toLocaleString()}</div>
+  `;
+  feedList.appendChild(div);
+});
+
+// ——— SUBMIT BID ————————————————————
+let raisedAmount = 1775000;
+const target = 2500000;
+let investorCount = 14;
+
+function submitBid() {
+  const nameEl = document.getElementById('inv-name');
+  const phoneEl = document.getElementById('inv-phone');
+  const name = nameEl.value.trim();
+  const phone = phoneEl.value.trim();
+
+  nameEl.classList.remove('error');
+  phoneEl.classList.remove('error');
+
+  let hasError = false;
+  if (!name) { nameEl.classList.add('error'); hasError = true; }
+  if (!phone) { phoneEl.classList.add('error'); hasError = true; }
+  if (hasError) return;
+
+  raisedAmount = Math.min(raisedAmount + selectedAmount, target);
+  investorCount++;
+  const pct = Math.round((raisedAmount / target) * 100);
+  const remaining = target - raisedAmount;
+
+  document.getElementById('main-progress').style.width = pct + '%';
+  document.getElementById('pct-label').textContent = pct + '%';
+  document.getElementById('raised-amount').textContent = '₦' + raisedAmount.toLocaleString();
+  document.getElementById('remaining-label').textContent = remaining > 0
+    ? '₦' + remaining.toLocaleString() + ' remaining'
+    : '🎉 Target reached!';
+  document.getElementById('feed-count').textContent = investorCount + ' investors';
+  document.getElementById('uc-count').textContent = investorCount;
+
+  const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  const newItem = document.createElement('div');
+  newItem.className = 'feed-item';
+  newItem.style.background = 'rgba(0,212,170,0.05)';
+  newItem.innerHTML = `
+    <div class="feed-avatar" style="border-color:var(--teal)">${initials}</div>
+    <div><div class="feed-name" style="color:var(--teal)">${name} (you)</div><div class="feed-time">just now</div></div>
+    <div class="feed-amount">₦${selectedAmount.toLocaleString()}</div>
+  `;
+  feedList.insertBefore(newItem, feedList.firstChild);
+
+  const ref = 'CS-01-' + String(investorCount).padStart(4, '0');
+  document.getElementById('modal-ref').textContent = ref;
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+  document.getElementById('inv-name').value = '';
+  document.getElementById('inv-phone').value = '';
+}
+
+// Close modal on overlay click
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ——— FAQ ——————————————————————————
+const faqs = [
+  { q: "What exactly am I investing in?", a: "You're buying a cashflow slot in a physical laundry unit in Port Harcourt. The unit is built, staffed, and operated by CleanStack. You receive a monthly bank transfer proportional to your slot size, indefinitely — or until you choose to exit." },
+  { q: "What happens if the bidding target is not met?", a: "If the total pool does not reach the ₦2.5M target within the bidding window, every investor receives a 100% refund within 48 hours. No deductions, no fees. Construction only begins when the target is fully met." },
+  { q: "How is my money protected before construction begins?", a: "All bid funds are held in escrow — a separate account that no one can touch until the target is hit. You'll receive a reference number and account details upon registration. The escrow is released to the build team only when the round closes successfully." },
+  { q: "What is the minimum I can invest?", a: "The minimum slot size for Unit 01 is ₦50,000. Multiple investors can pool small amounts — this is the whole point. 50 investors at ₦50K each = one fully-funded unit that runs forever." },
+  { q: "When do I start receiving returns?", a: "Returns begin on the 28th of the first full calendar month after the unit opens for business. If the unit opens on April 10, your first payout arrives on May 28. Payouts continue monthly until you exit." },
+  { q: "What is the 30/30/30/10 split and how does it affect me?", a: "Of every naira the unit earns: 30% goes to you (the investor pool, split proportionally by slot size), 30% to the founder/operator, 30% is retained to fund the next unit, and 10% sits in an emergency buffer. Your payout is from the investor 30% only." },
+  { q: "How do I exit if I want my capital back?", a: "After your initial capital is recovered through monthly payouts (estimated 7–11 months), your position becomes pure yield. If you want an earlier exit, CleanStack maintains a secondary list — we can match you with a new investor to buy your slot at agreed terms." },
+  { q: "Who runs the unit day-to-day?", a: "A full-time unit manager handles all daily operations: customer intake, staff supervision, cash reconciliation, and client contracts. You receive a WhatsApp report on the 1st of each month — no involvement required from investors." }
+];
+
+const faqList = document.getElementById('faq-list');
+faqs.forEach(f => {
+  const item = document.createElement('div');
+  item.className = 'faq-item';
+  item.innerHTML = `<div class="faq-q">${f.q}<span class="faq-icon">+</span></div><div class="faq-a">${f.a}</div>`;
+  item.querySelector('.faq-q').addEventListener('click', () => {
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  });
+  faqList.appendChild(item);
+});
+</script>
+</body>
+</html>
